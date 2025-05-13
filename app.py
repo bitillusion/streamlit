@@ -82,7 +82,7 @@ def plot_brightness_with_peaks(data, peaks):
 # -------------------------------
 
 st.set_page_config(page_title="Video Brightness BPM Estimator", layout="centered")
-st.title("❤️ Heart BPM Calculator")
+st.title("Heart BPM Calculator")
 
 uploaded_file = st.file_uploader("📁 Upload a video file", type=["mp4", "avi", "mov"])
 
@@ -108,13 +108,15 @@ if uploaded_file is not None:
 
 
             # BPM
+            st.write("") 
             bpm = estimate_bpm(peaks, fps)
             if bpm:
                 st.metric("Estimated BPM", f"{bpm} BPM")
             else:
                 st.warning("⚠️ Not enough peaks detected to estimate BPM.")
 
-            
+            st.markdown("---")
             # Plot
             fig = plot_brightness_with_peaks(data_clean.values, peaks)
             st.plotly_chart(fig, use_container_width=True)
+
