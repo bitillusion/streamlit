@@ -77,21 +77,24 @@ def plot_brightness_with_peaks(data, peaks):
     )
     return fig
 
+
+
 # -------------------------------
 # Streamlit App UI
 # -------------------------------
 
-st.set_page_config(page_title="Video Brightness BPM Estimator", layout="centered")
-st.title("Heart BPM Calculator")
 
-uploaded_file = st.file_uploader("📁 Upload a video file", type=["mp4", "avi", "mov"])
+st.markdown("## 💓 Heart Rate Estimator")
+st.caption("Estimate BPM from video brightness.")
 
-if uploaded_file is not None:
+uploaded_file = st.file_uploader("Upload a video file", type=["mp4", "avi", "mov"])
+
+if uploaded_file:
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
         temp_file.write(uploaded_file.read())
         temp_video_path = temp_file.name
 
-    with st.spinner("🔄 Processing video... Please wait."):
+    with st.spinner("🔄 Processing video..."):
         brightness_data, fps = extract_brightness(temp_video_path)
         os.remove(temp_video_path)
 
@@ -99,24 +102,26 @@ if uploaded_file is not None:
             st.error("❌ Could not read the video file.")
         else:
             duration = round(len(brightness_data) / fps, 1)
-            st.success(f"✅ Video processed!\n📹 FPS: {round(fps, 1)}\n⏱️ Duration: {duration} seconds")
+            st.success("✅ Video processed successfully!")
+            st.caption(f"**Frame Rate:** {round(fps, 1)} FPS &nbsp;&nbsp; • &nbsp;&nbsp; **Duration:** {duration} seconds")
 
-            # Clean and analyze
             df = pd.DataFrame(brightness_data, columns=["brightness"])
             data_clean = clean_data(df["brightness"])
             peaks = detect_peaks(data_clean.values)
 
-
             # BPM
-            st.write("") 
             bpm = estimate_bpm(peaks, fps)
             if bpm:
-                st.metric("Estimated BPM", f"{bpm} BPM")
+                st.write("")
+                st.write("")
+                st.metric("Estimated Heart Rate", f"{bpm} BPM")
             else:
                 st.warning("⚠️ Not enough peaks detected to estimate BPM.")
 
-            st.markdown("---")
             # Plot
+            st.markdown("---")
             fig = plot_brightness_with_peaks(data_clean.values, peaks)
             st.plotly_chart(fig, use_container_width=True)
 
+else:
+    st.info("📤 Upload a video file to begin analysis.")
