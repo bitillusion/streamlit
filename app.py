@@ -44,13 +44,30 @@ def detect_peaks(data, distance=9, width=4, rel_height=0.5):
     peaks, _ = signal.find_peaks(data, distance=distance, width=width, rel_height=rel_height)
     return peaks
 
+def robust_mode_gap(gaps, neighbor_window=1, top_n=3):
+    gap_counts = pd.Series(gaps).value_counts().sort_values(ascending=False)
+    top_gaps = gap_counts.head(top_n)
+    top_gap = top_gaps.index[0]
+    neighbor_range = range(top_gap - neighbor_window, top_gap + neighbor_window + 1)
+    matched = top_gaps[top_gaps.index.isin(neighbor_range)]
+    print(gap_counts)
+    weighted_gap = sum(gap * count for gap, count in matched.items()) / matched.sum()
+    return weighted_gap
 
 def estimate_bpm(peaks, fps):
     if len(peaks) < 2:
         return None
     gaps = np.diff(peaks)
-    mode_gap = stats.mode(gaps, keepdims=False)[0]
-    return int(fps * 60 / mode_gap)
+
+    #mode_gap = stats.mode(gaps, keepdims=False)[0]
+    #bpm = int(fps * 60 / mode_gap)
+    #print(bpm)
+
+    mode_gap = robust_mode_gap(gaps)
+    bpm = int(fps * 60 / mode_gap)
+    print(bpm)
+
+    return bpm
 
 
 def plot_brightness_with_peaks(data, peaks):
