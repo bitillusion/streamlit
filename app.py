@@ -73,24 +73,32 @@ def estimate_bpm(peaks, fps):
 def plot_brightness_with_peaks(data, peaks):
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=np.arange(len(data)),
+        # x=np.arange(len(data)),
+        x=np.arange(len(data)) / fps,       #add seconds data
         y=data,
         mode='lines',
         name='Brightness'
     ))
     fig.add_trace(go.Scatter(
-        x=np.arange(len(data))[peaks],
+        x=np.arange(len(data))[peaks]/fps,
         y=data[peaks],
         mode='markers',
         name='Peaks',
         marker=dict(color='red', size=8, symbol='x')
     ))
     fig.update_layout(
-        title="Brightness Data with Detected Peaks",
-        xaxis_title="Frame Index",
-        yaxis_title="Average Brightness",
-        showlegend=True,
-        height=400
+        #title="",
+        xaxis_title="Time (Seconds)",
+
+        yaxis_title="Signal Strength",
+        yaxis=dict(
+            showticklabels=False,   # Hides the tick labels
+            # title=None              # Removes the axis title
+        ),
+
+        showlegend=False,
+        height=300,
+        margin=dict(t=10) 
     )
     return fig
 
@@ -125,11 +133,11 @@ if uploaded_file:
             df = pd.DataFrame(brightness_data, columns=["brightness"])
             data_clean = clean_data(df["brightness"])
             peaks = detect_peaks(data_clean.values)
-
+            
+            
             # BPM
             bpm = estimate_bpm(peaks, fps)
             if bpm:
-                st.write("")
                 st.write("")
                 st.metric("Estimated Heart Rate", f"{bpm} BPM")
             else:
@@ -137,6 +145,7 @@ if uploaded_file:
 
             # Plot
             st.markdown("---")
+            st.write("Brightness Data with Detected Peaks")
             fig = plot_brightness_with_peaks(data_clean.values, peaks)
             st.plotly_chart(fig, use_container_width=True)
 
