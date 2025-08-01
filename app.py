@@ -40,7 +40,7 @@ def clean_data(data):
     return data[~((data < lower) | (data > upper))]
 
 
-def detect_peaks(data, distance=9, width=4, rel_height=0.5):
+def detect_peaks(data, distance=5, width=2, rel_height=0.5):
     peaks, _ = signal.find_peaks(data, distance=distance, width=width, rel_height=rel_height)
     return peaks
 
